@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>每日工作日誌</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --purple: #534AB7; --purple-light: #EEEDFE; --purple-mid: #7F77DD; --purple-dark: #3C3489;
+  --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+  --blue: #378ADD; --blue-light: #E6F1FB; --blue-dark: #0C447C;
+  --coral: #D85A30; --coral-light: #FAECE7; --coral-dark: #712B13;
+  --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #633806;
+  --pink: #D4537E; --pink-light: #FBEAF0; --pink-dark: #72243E;
+  --green: #639922; --green-light: #EAF3DE; --green-dark: #3B6D11;
+  --red: #E24B4A; --red-light: #FCEBEB; --red-dark: #791F1F;
+  --gray: #888780; --gray-light: #F1EFE8; --gray-dark: #444441;
+  --bg: #ffffff; --bg2: #f5f5f3; --bg3: #efefec;
+  --text: #1a1a18; --text2: #6b6b66; --text3: #a8a8a2;
+  --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.25);
+  --radius: 8px; --radius-lg: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a; --bg2: #252523; --bg3: #2e2e2b;
+    --text: #f0f0ec; --text2: #a8a8a2; --text3: #6b6b66;
+    --border: rgba(255,255,255,0.12); --border2: rgba(255,255,255,0.25);
+    --purple-light: #26215C; --purple-dark: #CECBF6;
+    --teal-light: #04342C; --teal-dark: #9FE1CB;
+    --blue-light: #042C53; --blue-dark: #B5D4F4;
+    --coral-light: #4A1B0C; --coral-dark: #F5C4B3;
+    --amber-light: #412402; --amber-dark: #FAC775;
+    --pink-light: #4B1528; --pink-dark: #F4C0D1;
+    --green-light: #173404; --green-dark: #C0DD97;
+    --red-light: #501313; --red-dark: #F7C1C1;
+    --gray-light: #2C2C2A; --gray-dark: #D3D1C7;
+  }
+}
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+.page { max-width: 700px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+/* Header */
+.header { text-align: center; margin-bottom: 2rem; }
+.badge { display: inline-block; background: var(--purple-light); color: var(--purple-dark); font-size: 12px; font-weight: 600; padding: 4px 14px; border-radius: 999px; margin-bottom: 10px; }
+.header h1 { font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.header p { font-size: 14px; color: var(--text2); }
+
+/* Date bar */
+.date-bar { display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border-radius: var(--radius-lg); padding: 13px 18px; margin-bottom: 1.5rem; border: 0.5px solid var(--border); }
+.date-label { font-size: 13px; color: var(--text2); }
+.date-val { font-size: 15px; font-weight: 600; }
+
+/* Summary */
+.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 2rem; }
+.sum-card { background: var(--bg2); border-radius: var(--radius); padding: 14px; text-align: center; border: 0.5px solid var(--border); }
+.sum-label { font-size: 11px; color: var(--text2); margin-bottom: 5px; }
+.sum-val { font-size: 22px; font-weight: 700; }
+.sum-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Section */
+.section { margin-bottom: 1.5rem; }
+.sec-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.sec-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sec-title { font-size: 15px; font-weight: 600; }
+.sec-sub { font-size: 13px; color: var(--text2); font-weight: 400; margin-left: 2px; }
+.sec-tag { font-size: 11px; padding: 2px 9px; border-radius: 999px; font-weight: 600; margin-left: auto; }
+.card { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.1rem 1.3rem; }
+
+/* Count + Goal */
+.count-goal-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+.cg-block { display: flex; flex-direction: column; gap: 6px; }
+.cg-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+.count-ctrl { display: flex; align-items: center; gap: 10px; }
+.cbtn { width: 30px; height: 30px; border-radius: 6px; border: 0.5px solid var(--border2); background: var(--bg2); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.12s; }
+.cbtn:hover { background: var(--bg3); }
+.cnum { font-size: 20px; font-weight: 700; min-width: 26px; text-align: center; }
+.goal-input { width: 64px; height: 30px; border-radius: 6px; border: 0.5px solid var(--border); background: var(--bg2); color: var(--text); padding: 0 10px; font-size: 15px; font-weight: 600; text-align: center; font-family: inherit; }
+.goal-input:focus { outline: none; border-color: var(--purple); }
+
+/* Progress bar */
+.prog-wrap { margin-bottom: 12px; }
+.prog-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 5px; }
+.prog-bg { height: 6px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.prog-fill { height: 100%; border-radius: 999px; transition: width 0.35s ease; }
+
+/* Divider */
+.divider { height: 0.5px; background: var(--border); margin: 12px 0; }
+
+/* Entry rows */
+.entries-area { display: flex; flex-direction: column; gap: 8px; }
+.entry-row { display: grid; grid-template-columns: 1fr 1.6fr; gap: 8px; }
+.entry-row input { height: 34px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg2); color: var(--text); padding: 0 11px; font-size: 13px; font-family: inherit; width: 100%; transition: border-color 0.12s; }
+.entry-row input:focus { outline: none; border-color: var(--purple); }
+.entry-row input::placeholder { color: var(--text3); }
+
+/* Textarea */
+textarea { width: 100%; border: 0.5px solid var(--border); border-radius: var(--radius); background: var(--bg2); color: var(--text); padding: 10px 12px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 74px; line-height: 1.6; transition: border-color 0.12s; }
+textarea:focus { outline: none; border-color: var(--purple); }
+textarea::placeholder { color: var(--text3); }
+
+/* Todo */
+.todo-list { display: flex; flex-direction: column; gap: 7px; margin-bottom: 8px; }
+.todo-item { display: flex; align-items: center; gap: 10px; background: var(--bg2); border-radius: var(--radius); padding: 9px 12px; border: 0.5px solid var(--border); }
+.todo-item.dragging { opacity: 0.3; }
+.todo-item.drag-over { border-color: var(--purple); background: var(--purple-light); }
+.todo-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: var(--purple); flex-shrink: 0; }
+.todo-item input[type="text"] { flex: 1; border: none; background: transparent; color: var(--text); font-size: 14px; font-family: inherit; }
+.todo-item input[type="text"]:focus { outline: none; }
+.todo-item input[type="text"]::placeholder { color: var(--text3); }
+.todo-item input[type="text"].done { text-decoration: line-through; color: var(--text3); }
+.drag-handle { color: var(--text3); font-size: 15px; cursor: grab; user-select: none; flex-shrink: 0; }
+.todo-del { color: var(--text3); font-size: 18px; cursor: pointer; flex-shrink: 0; line-height: 1; padding: 0 2px; }
+.todo-del:hover { color: var(--red); }
+.todo-add { display: flex; align-items: center; gap: 8px; padding: 7px 12px; border: 0.5px dashed var(--border2); border-radius: var(--radius); cursor: pointer; color: var(--text2); font-size: 13px; background: transparent; width: 100%; font-family: inherit; }
+.todo-add:hover { background: var(--bg2); }
+
+/* Mood */
+.mood-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.mood-lbl { font-size: 13px; color: var(--text2); width: 56px; flex-shrink: 0; }
+.mood-btns { display: flex; gap: 8px; }
+.mood-btn { width: 44px; height: 44px; border-radius: var(--radius); border: 0.5px solid var(--border); background: var(--bg2); cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: border-color 0.12s, background 0.12s; }
+.mood-btn:hover { border-color: var(--border2); }
+.mood-btn.selected { border: 2.5px solid var(--purple); background: var(--purple-light); }
+.mood-desc { font-size: 14px; color: var(--purple); font-weight: 600; }
+
+/* Submit */
+.submit-btn { width: 100%; height: 50px; border-radius: var(--radius-lg); background: var(--purple); color: white; font-size: 16px; font-weight: 600; border: none; cursor: pointer; margin-top: 2rem; font-family: inherit; letter-spacing: 0.02em; transition: opacity 0.15s, transform 0.1s; }
+.submit-btn:hover { opacity: 0.88; }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.submit-btn:active { transform: scale(0.99); }
+.banner { display: none; border-radius: var(--radius-lg); padding: 14px 18px; margin-top: 1rem; text-align: center; font-size: 14px; font-weight: 600; }
+.banner.ok { background: var(--teal-light); border: 0.5px solid #5DCAA5; color: var(--teal-dark); }
+.banner.err { background: var(--red-light); border: 0.5px solid #F09595; color: var(--red-dark); }
+
+@media (max-width: 480px) {
+  .count-goal-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .summary-grid { gap: 7px; }
+  .sum-val { font-size: 18px; }
+  .mood-btns { gap: 6px; }
+  .mood-btn { width: 38px; height: 38px; font-size: 18px; }
+  .entry-row { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="badge">每日記錄</div>
+    <h1>今日工作日誌</h1>
+    <p id="hdate"></p>
+  </div>
+
+  <div class="date-bar">
+    <span class="date-label">記錄日期</span>
+    <span class="date-val" id="tdate"></span>
+  </div>
+
+  <div class="summary-grid">
+    <div class="sum-card"><div class="sum-label">今日總活動</div><div class="sum-val" id="sum-total">0</div><div class="sum-sub">筆</div></div>
+    <div class="sum-card"><div class="sum-label">待辦完成率</div><div class="sum-val" id="sum-done">—</div><div class="sum-sub">已勾選</div></div>
+    <div class="sum-card"><div class="sum-label">今日心情</div><div class="sum-val" id="sum-mood">—</div><div class="sum-sub">/ 5</div></div>
+  </div>
+
+  <div id="sections-container"></div>
+
+  <!-- 今日待辦 -->
+  <div class="section">
+    <div class="sec-header">
+      <div class="sec-dot" style="background:var(--gray)"></div>
+      <span class="sec-title">今日待辦</span>
+      <span class="sec-tag" style="background:var(--gray-light);color:var(--gray-dark)">任務</span>
+    </div>
+    <div class="card">
+      <div class="todo-list" id="todo-list"></div>
+      <button class="todo-add" onclick="addTodo()">＋ 新增待辦</button>
+    </div>
+  </div>
+
+  <!-- 今日尚未完成 -->
+  <div class="section">
+    <div class="sec-header">
+      <div class="sec-dot" style="background:var(--red)"></div>
+      <span class="sec-title">今日尚未完成</span>
+      <span class="sec-tag" style="background:var(--red-light);color:var(--red-dark)">待跟進</span>
+    </div>
+    <div class="card">
+      <textarea id="incomplete" placeholder="記錄今天沒完成的事項，明天優先處理..."></textarea>
+    </div>
+  </div>
+
+  <!-- 今日學習 -->
+  <div class="section">
+    <div class="sec-header">
+      <div class="sec-dot" style="background:var(--green)"></div>
+      <span class="sec-title">今日學習</span>
+      <span class="sec-tag" style="background:var(--green-light);color:var(--green-dark)">成長</span>
+    </div>
+    <div class="card">
+      <textarea id="learning" placeholder="今天學到了什麼？有什麼值得記下來的洞察或技巧..."></textarea>
+    </div>
+  </div>
+
+  <!-- 今日心情 -->
+  <div class="section">
+    <div class="sec-header">
+      <div class="sec-dot" style="background:var(--purple-mid)"></div>
+      <span class="sec-title">今日心情</span>
+      <span class="sec-tag" style="background:var(--purple-light);color:var(--purple-dark)">狀態</span>
+    </div>
+    <div class="card">
+      <div class="mood-row">
+        <span class="mood-lbl">評分</span>
+        <div class="mood-btns">
+          <button class="mood-btn" data-v="1" onclick="setMood(1)">😞</button>
+          <button class="mood-btn" data-v="2" onclick="setMood(2)">😕</button>
+          <button class="mood-btn" data-v="3" onclick="setMood(3)">😐</button>
+          <button class="mood-btn" data-v="4" onclick="setMood(4)">😊</button>
+          <button class="mood-btn" data-v="5" onclick="setMood(5)">😄</button>
+        </div>
+        <span class="mood-desc" id="mood-desc"></span>
+      </div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">提交今日記錄 →</button>
+  <div class="banner" id="banner"></div>
+
+</div><!-- .page -->
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbypzXyOxs54ONnG3QbpOrHifS8IZ9ZjEWC_tpQIDxqLjwVSbUXSApbDNx1aPmTGwL27lg/exec";
+
+const SECTIONS = [
+  { key:"new",     label:"今日新名單", sub:"",           dotColor:"#7F77DD", tagBg:"#EEEDFE", tagC:"#3C3489", p1:"名字",     p2:"議題/備註",   tag:"新客開發" },
+  { key:"contact", label:"今日定聯",   sub:"",           dotColor:"#D4537E", tagBg:"#FBEAF0", tagC:"#72243E", p1:"名字",     p2:"定聯話題",   tag:"關係維繫" },
+  { key:"pa",      label:"今日 PA",    sub:"約訪",       dotColor:"#378ADD", tagBg:"#E6F1FB", tagC:"#0C447C", p1:"客戶名字", p2:"約訪議題",   tag:"PA" },
+  { key:"af",      label:"今日 AF",    sub:"銷售面談",   dotColor:"#1D9E75", tagBg:"#E1F5EE", tagC:"#085041", p1:"客戶名字", p2:"面談重點",   tag:"AF" },
+  { key:"pc",      label:"今日 PC",    sub:"遞送建議書", dotColor:"#D85A30", tagBg:"#FAECE7", tagC:"#712B13", p1:"客戶名字", p2:"建議書內容", tag:"PC" },
+  { key:"car",     label:"車險續保",   sub:"",           dotColor:"#BA7517", tagBg:"#FAEEDA", tagC:"#633806", p1:"客戶名字", p2:"到期日/車牌",tag:"續保" }
+];
+
+const state = {};
+SECTIONS.forEach(s => { state[s.key] = { count: 0, goal: 3 }; });
+let moodVal = 0;
+const moodLabels = ["", "低落", "有點累", "普通", "不錯", "很棒"];
+let dragSrc = null;
+
+/* ── Build dynamic sections ── */
+function buildSections() {
+  const container = document.getElementById("sections-container");
+  SECTIONS.forEach(s => {
+    const div = document.createElement("div");
+    div.className = "section";
+    div.innerHTML = `
+      <div class="sec-header">
+        <div class="sec-dot" style="background:${s.dotColor}"></div>
+        <span class="sec-title">${s.label}${s.sub ? '<span class="sec-sub"> ' + s.sub + '</span>' : ''}</span>
+        <span class="sec-tag" style="background:${s.tagBg};color:${s.tagC}">${s.tag}</span>
+      </div>
+      <div class="card">
+        <div class="count-goal-row">
+          <div class="cg-block">
+            <div class="cg-label">實際數量</div>
+            <div class="count-ctrl">
+              <button class="cbtn" onclick="adj('${s.key}',-1)">−</button>
+              <span class="cnum" id="cnt-${s.key}">0</span>
+              <button class="cbtn" onclick="adj('${s.key}',1)">＋</button>
+            </div>
+          </div>
+          <div class="cg-block">
+            <div class="cg-label">今日目標</div>
+            <div class="count-ctrl">
+              <input class="goal-input" type="number" min="0" max="99" value="3"
+                     id="goal-${s.key}" oninput="updateProgress('${s.key}')" />
+            </div>
+          </div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-meta">
+            <span>完成進度</span>
+            <span id="prog-label-${s.key}">0 / 3</span>
+          </div>
+          <div class="prog-bg">
+            <div class="prog-fill" id="prog-${s.key}" style="width:0%;background:${s.dotColor}"></div>
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="entries-area" id="entries-${s.key}"></div>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+/* ── Counter ── */
+function adj(key, d) {
+  state[key].count = Math.max(0, state[key].count + d);
+  document.getElementById("cnt-" + key).textContent = state[key].count;
+  updateProgress(key);
+  renderEntries(key);
+  updateSummary();
+}
+
+function updateProgress(key) {
+  const cnt = state[key].count;
+  const g = Math.max(1, parseInt(document.getElementById("goal-" + key).value) || 1);
+  state[key].goal = g;
+  const pct = Math.min(100, Math.round(cnt / g * 100));
+  document.getElementById("prog-" + key).style.width = pct + "%";
+  document.getElementById("prog-label-" + key).textContent = cnt + " / " + g;
+}
+
+function renderEntries(key) {
+  const s = SECTIONS.find(x => x.key === key);
+  const area = document.getElementById("entries-" + key);
+  const n = state[key].count;
+  while (area.children.length > n) area.removeChild(area.lastChild);
+  while (area.children.length < n) {
+    const i = area.children.length + 1;
+    const row = document.createElement("div");
+    row.className = "entry-row";
+    row.innerHTML = `<input type="text" placeholder="${s.p1} ${i}" /><input type="text" placeholder="${s.p2}" />`;
+    area.appendChild(row);
+  }
+}
+
+/* ── Todo ── */
+function addTodo() {
+  const list = document.getElementById("todo-list");
+  const item = document.createElement("div");
+  item.className = "todo-item";
+  item.draggable = true;
+  item.innerHTML = `<span class="drag-handle">⠿</span><input type="checkbox" onchange="syncDone(this)" /><input type="text" placeholder="輸入待辦事項..." /><span class="todo-del" onclick="this.parentNode.remove();updateSummary()">×</span>`;
+  item.addEventListener("dragstart", e => { dragSrc = item; item.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+  item.addEventListener("dragend", () => { item.classList.remove("dragging"); document.querySelectorAll(".todo-item").forEach(x => x.classList.remove("drag-over")); });
+  item.addEventListener("dragover", e => { e.preventDefault(); item.classList.add("drag-over"); });
+  item.addEventListener("dragleave", () => item.classList.remove("drag-over"));
+  item.addEventListener("drop", e => {
+    e.preventDefault();
+    if (dragSrc && dragSrc !== item) {
+      const all = [...list.children];
+      const si = all.indexOf(dragSrc), ti = all.indexOf(item);
+      si < ti ? list.insertBefore(dragSrc, item.nextSibling) : list.insertBefore(dragSrc, item);
+    }
+    item.classList.remove("drag-over");
+  });
+  list.appendChild(item);
+  item.querySelector("input[type='text']").focus();
+  updateSummary();
+}
+
+function syncDone(cb) {
+  const txt = cb.parentNode.querySelector("input[type='text']");
+  cb.checked ? txt.classList.add("done") : txt.classList.remove("done");
+  updateSummary();
+}
+
+/* ── Mood ── */
+function setMood(v) {
+  moodVal = v;
+  document.querySelectorAll(".mood-btn").forEach(b => b.classList.toggle("selected", parseInt(b.dataset.v) === v));
+  document.getElementById("mood-desc").textContent = moodLabels[v];
+  document.getElementById("sum-mood").textContent = v;
+}
+
+/* ── Summary bar ── */
+function updateSummary() {
+  let total = 0;
+  SECTIONS.forEach(s => total += state[s.key].count);
+  document.getElementById("sum-total").textContent = total;
+  const items = document.querySelectorAll(".todo-item");
+  const done = document.querySelectorAll(".todo-item input[type='checkbox']:checked").length;
+  document.getElementById("sum-done").textContent = items.length ? done + "/" + items.length : "—";
+}
+
+/* ── Collect data ── */
+function getEntries(key) {
+  return [...document.querySelectorAll(`#entries-${key} .entry-row`)].map(r => {
+    const ins = r.querySelectorAll("input");
+    return { name: ins[0].value.trim(), topic: ins[1].value.trim() };
+  }).filter(x => x.name || x.topic);
+}
+
+function getTodos() {
+  return [...document.querySelectorAll(".todo-item")].map(i => {
+    const cb = i.querySelector("input[type='checkbox']");
+    const txt = i.querySelector("input[type='text']").value.trim();
+    return txt ? (cb.checked ? "[✓] " + txt : "[ ] " + txt) : null;
+  }).filter(Boolean).join("\n");
+}
+
+/* ── Submit ── */
+async function handleSubmit() {
+  const btn = document.getElementById("submit-btn");
+  btn.textContent = "送出中...";
+  btn.disabled = true;
+
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("zh-TW", { year: "numeric", month: "2-digit", day: "2-digit" });
+
+  const payload = { date: dateStr };
+  SECTIONS.forEach(s => {
+    payload[s.key + "_count"] = state[s.key].count;
+    payload[s.key + "_entries"] = getEntries(s.key);
+  });
+  payload.todos      = getTodos();
+  payload.incomplete = document.getElementById("incomplete").value.trim();
+  payload.learning   = document.getElementById("learning").value.trim();
+  payload.mood       = moodVal || "";
+
+  const banner = document.getElementById("banner");
+  try {
+    await fetch(SCRIPT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    banner.className = "banner ok";
+    banner.textContent = "記錄已成功送出！請至 Google 試算表確認資料 ✓";
+  } catch (err) {
+    banner.className = "banner err";
+    banner.textContent = "送出失敗，請確認網路連線後重試。";
+  }
+  banner.style.display = "block";
+  btn.textContent = "提交今日記錄 →";
+  btn.disabled = false;
+  setTimeout(() => { banner.style.display = "none"; }, 6000);
+}
+
+/* ── Init ── */
+function init() {
+  const now = new Date();
+  const full = now.toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric", weekday: "long" });
+  document.getElementById("tdate").textContent = full;
+  document.getElementById("hdate").textContent = full;
+  buildSections();
+  SECTIONS.forEach(s => updateProgress(s.key));
+  addTodo(); addTodo(); addTodo();
+}
+
+init();
+</script>
+</body>
+</html>
